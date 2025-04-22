@@ -1,14 +1,14 @@
 package com.example.demo.controllers;
 
-import com.example.demo.models.Trip;
-import com.example.demo.services.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import com.example.demo.models.Trip;
+import com.example.demo.services.TripService;
+
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -22,51 +22,51 @@ public class TripController {
         this.tripService = tripService;
     }
 
-    // Add a new trip
     @PostMapping("/addTrip")
-    public Trip addTrip(@RequestBody Trip trip) {
-        return tripService.addTrip(trip);
+    public ResponseEntity<Trip> addTrip(@RequestBody Trip trip) {
+        Trip newTrip = tripService.addTrip(trip);
+        return new ResponseEntity<>(newTrip, HttpStatus.OK);
     }
 
-    // Get all trips
     @GetMapping("/allTrips")
-    public List<Trip> getAllTrips() {
-        return tripService.getAllTrips();
+    public ResponseEntity<List<Trip>> getAllTrips() {
+        List<Trip> trips = tripService.getAllTrips();
+        return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
-    // Get a specific trip by ID
     @GetMapping("/{id}")
-    public Trip getTripById(@PathVariable Long id) {
-        return tripService.getTripById(id);
+    public ResponseEntity<Trip> getTripById(@PathVariable Long id) {
+        Trip trip = tripService.getTripById(id);
+        return trip != null ? 
+            new ResponseEntity<>(trip, HttpStatus.OK) : 
+            new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // Update a trip
     @PutMapping("/update/{id}")
-    public Trip updateTrip(@PathVariable Long id, @RequestBody Trip trip) {
-        return tripService.updateTrip(id, trip);
+    public ResponseEntity<Trip> updateTrip(@PathVariable Long id, @RequestBody Trip trip) {
+        Trip updatedTrip = tripService.updateTrip(id, trip);
+        return updatedTrip != null ? 
+            new ResponseEntity<>(updatedTrip, HttpStatus.OK) : 
+            new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // Delete a trip
     @DeleteMapping("/delete/{id}")
-    public String deleteTrip(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTrip(@PathVariable Long id) {
         tripService.deleteTrip(id);
-        return "Trip with ID " + id + " deleted successfully.";
+        return new ResponseEntity<>("Trip deleted successfully", HttpStatus.OK);
     }
 
-    // Find trips within a date range
     @GetMapping("/findByDateRange")
-    public List<Trip> findTripsWithinDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
-    ) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return tripService.findTripsWithinDateRange(startDateTime, endDateTime);
+    public ResponseEntity<List<Trip>> findTripsWithinDateRange(
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        List<Trip> trips = tripService.findTripsByDateRange(startDate, endDate);
+        return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
-    // Find trips by captain ID
     @GetMapping("/findByCaptainId")
-    public List<Trip> findTripsByCaptainId(@RequestParam Long captainId) {
-        return tripService.findTripsByCaptainId(captainId);
+    public ResponseEntity<List<Trip>> findTripsByCaptainId(@RequestParam Long captainId) {
+        List<Trip> trips = tripService.findTripsByCaptainId(captainId);
+        return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 }

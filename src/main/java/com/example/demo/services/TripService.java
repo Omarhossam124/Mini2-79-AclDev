@@ -1,14 +1,14 @@
 package com.example.demo.services;
 
 
-import com.example.demo.models.Trip;
-import com.example.demo.repositories.TripRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.models.Trip;
+import com.example.demo.repositories.TripRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TripService {
@@ -30,36 +30,27 @@ public class TripService {
         return tripRepository.findAll();
     }
 
-    // Get a trip by ID
+    // Get trip by ID
     public Trip getTripById(Long id) {
-        Optional<Trip> optionalTrip = tripRepository.findById(id);
-        return optionalTrip.orElse(null);
+        return tripRepository.findById(id).orElse(null);
     }
 
-    // Update a trip
-    public Trip updateTrip(Long id, Trip updatedTrip) {
-        Optional<Trip> optionalTrip = tripRepository.findById(id);
-        if (optionalTrip.isPresent()) {
-            Trip existingTrip = optionalTrip.get();
-            existingTrip.setTripDate(updatedTrip.getTripDate());
-            existingTrip.setOrigin(updatedTrip.getOrigin());
-            existingTrip.setDestination(updatedTrip.getDestination());
-            existingTrip.setTripCost(updatedTrip.getTripCost());
-            existingTrip.setCaptain(updatedTrip.getCaptain());
-            existingTrip.setCustomer(updatedTrip.getCustomer());
-            return tripRepository.save(existingTrip);
-        } else {
-            return null;
+    // Update trip
+    public Trip updateTrip(Long id, Trip trip) {
+        if (tripRepository.existsById(id)) {
+            trip.setId(id);
+            return tripRepository.save(trip);
         }
+        return null;
     }
 
-    // Delete a trip
+    // Delete trip
     public void deleteTrip(Long id) {
         tripRepository.deleteById(id);
     }
 
-    // Find trips within a date range
-    public List<Trip> findTripsWithinDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+    // Find trips within date range
+    public List<Trip> findTripsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return tripRepository.findByTripDateBetween(startDate, endDate);
     }
 
