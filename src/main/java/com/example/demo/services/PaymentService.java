@@ -39,7 +39,6 @@ public class PaymentService {
         Payment payment = getPaymentById(id);
         payment.setAmount(paymentDetails.getAmount());
         payment.setPaymentMethod(paymentDetails.getPaymentMethod());
-        payment.setPaymentStatus(paymentDetails.getPaymentStatus());
         return paymentRepository.save(payment);
     }
 
