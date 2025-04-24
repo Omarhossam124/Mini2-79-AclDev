@@ -8,6 +8,11 @@ public class Payment {
     private Trip trip; // Assuming there's a Trip class
 
     // Constructor
+    public Payment(double amount, String paymentMethod, boolean paymentStatus) {
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+    }
     public Payment(Long id, double amount, String paymentMethod, boolean paymentStatus) {
         this.id = id;
         this.amount = amount;
