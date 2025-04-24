@@ -2,7 +2,10 @@ package com.example.demo.controllers;
 
 import com.example.demo.models.Payment;
 import com.example.demo.services.PaymentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,9 +46,9 @@ public class PaymentController {
 
     // 9.4.2.5 Delete Payment
     @DeleteMapping("/delete/{id}")
-    public String deletePayment(@PathVariable Long id) {
-        paymentService.deletePayment(id);
-        return "Payment with ID " + id + " has been deleted.";
+    public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
+        paymentService.deletePayment(id); // Modified service method
+        return ResponseEntity.ok().build(); // Always return 200
     }
 
     // 9.4.2.6 Find Payments By Trip ID

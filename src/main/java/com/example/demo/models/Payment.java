@@ -1,23 +1,47 @@
 package com.example.demo.models;
 
-public class Payment {
-    private Long id; // Unique identifier for the payment
-    private double amount;
-    private String paymentMethod;
-    private boolean paymentStatus;
-    private Trip trip; // Assuming there's a Trip class
+import jakarta.persistence.*;
+import java.util.Objects;
 
-    // Constructor
+@Entity
+@Table(name = "payments")
+public class Payment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    private Double amount;
+    private String paymentMethod;
+    private Boolean paymentStatus;
+    
+    @OneToOne
+    @JoinColumn(name = "trip_id")
+    private Trip trip;
+
+    // Default constructor
+    public Payment() {
+    }
     public Payment(double amount, String paymentMethod, boolean paymentStatus) {
         this.amount = amount;
         this.paymentMethod = paymentMethod;
         this.paymentStatus = paymentStatus;
     }
-    public Payment(Long id, double amount, String paymentMethod, boolean paymentStatus) {
+
+    // Partial constructor (without ID)
+    public Payment(Double amount, String paymentMethod, Boolean paymentStatus, Trip trip) {
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+        this.trip = trip;
+    }
+
+    // Full constructor
+    public Payment(Long id, Double amount, String paymentMethod, Boolean paymentStatus, Trip trip) {
         this.id = id;
         this.amount = amount;
         this.paymentMethod = paymentMethod;
         this.paymentStatus = paymentStatus;
+        this.trip = trip;
     }
 
     // Getters and Setters
@@ -29,11 +53,11 @@ public class Payment {
         this.id = id;
     }
 
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
@@ -45,11 +69,11 @@ public class Payment {
         this.paymentMethod = paymentMethod;
     }
 
-    public boolean isPaymentStatus() {
+    public Boolean getPaymentStatus() {
         return paymentStatus;
     }
 
-    public void setPaymentStatus(boolean paymentStatus) {
+    public void setPaymentStatus(Boolean paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
 
@@ -61,15 +85,33 @@ public class Payment {
         this.trip = trip;
     }
 
-       // Method to display payment details
-       @Override
-       public String toString() {
-           return "Payment{" +
-                   "id=" + id +
-                   ", amount=" + amount +
-                   ", paymentMethod='" + paymentMethod + '\'' +
-                   ", paymentStatus=" + paymentStatus +
-                   '}';
-       }
-}
+    // equals() and hashCode()
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Payment payment = (Payment) o;
+        return Objects.equals(id, payment.id) &&
+               Objects.equals(amount, payment.amount) &&
+               Objects.equals(paymentMethod, payment.paymentMethod) &&
+               Objects.equals(paymentStatus, payment.paymentStatus) &&
+               Objects.equals(trip, payment.trip);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, amount, paymentMethod, paymentStatus, trip);
+    }
+
+    // toString()
+    @Override
+    public String toString() {
+        return "Payment{" +
+               "id=" + id +
+               ", amount=" + amount +
+               ", paymentMethod='" + paymentMethod + '\'' +
+               ", paymentStatus=" + paymentStatus +
+               ", trip=" + trip +
+               '}';
+    }
+}

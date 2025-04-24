@@ -20,10 +20,12 @@ import com.example.demo.models.Trip;
 import com.example.demo.repositories.CaptainRepository;
 import com.example.demo.repositories.CustomerRepository;
 import com.example.demo.repositories.PaymentRepository;
+import com.example.demo.repositories.RatingRepository;
 import com.example.demo.repositories.TripRepository;
 import com.example.demo.services.CaptainService;
 import com.example.demo.services.CustomerService;
 import com.example.demo.services.PaymentService;
+import com.example.demo.services.RatingService;
 import com.example.demo.services.TripService;
 
 import java.lang.reflect.Field;
@@ -35,10 +37,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Sql(statements = {
 		// Drop tables if they exist — order matters due to FK constraints
-		"DROP TABLE IF EXISTS payments;",
-		"DROP TABLE IF EXISTS trips;",
-		"DROP TABLE IF EXISTS customers;",
-		"DROP TABLE IF EXISTS captains;",
+		"DROP TABLE IF EXISTS payments CASCADE;",
+		"DROP TABLE IF EXISTS trips CASCADE;",
+		"DROP TABLE IF EXISTS customers CASCADE;",
+		"DROP TABLE IF EXISTS captains CASCADE;",
 
 		// Create captains table
 		"CREATE TABLE captains (" +
@@ -103,10 +105,10 @@ class Mini2ApplicationTests {
 	@Autowired
 	private TripRepository tripRepository;
 
-	// @Autowired
-	// private RatingService ratingService;
-	// @Autowired
-	// private RatingRepository ratingRepository;
+	@Autowired
+	private RatingService ratingService;
+	@Autowired
+	private RatingRepository ratingRepository;
 
 	private final String BASE_URL_CAPTAIN = "http://localhost:8080/captain";
 	private final String BASE_URL_CUSTOMER = "http://localhost:8080/customer";
@@ -135,7 +137,7 @@ class Mini2ApplicationTests {
 
 		// paymentRepository.deleteAll();
 		// tripRepository.deleteAll();
-		// ratingRepository.deleteAll();
+		ratingRepository.deleteAll();
 		// captainRepository.deleteAll();
 		// customerRepository.deleteAll();
 	}
@@ -473,17 +475,17 @@ class Mini2ApplicationTests {
 		assertTrue(response.getBody().isEmpty());
 	}
 
-	// @Test
-	// public void testControllerFindRatingsAboveScoreNoneFound() {
-	// 	ratingService.addRating(new Rating(7L, "customer", 2, "Bad.", LocalDateTime.now()));
-	// 	ResponseEntity<List> response = restTemplate.getForEntity(
-	// 			BASE_URL_RATING + "/findAboveScore?minScore=5",
-	// 			List.class
-	// 	);
-	// 	assertEquals(HttpStatus.OK, response.getStatusCode());
-	// 	assertNotNull(response.getBody());
-	// 	assertTrue(response.getBody().isEmpty());
-	// }
+	@Test
+	public void testControllerFindRatingsAboveScoreNoneFound() {
+		ratingService.addRating(new Rating(7L, "customer", 2, "Bad.", LocalDateTime.now()));
+		ResponseEntity<List> response = restTemplate.getForEntity(
+				BASE_URL_RATING + "/findAboveScore?minScore=5",
+				List.class
+		);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertTrue(response.getBody().isEmpty());
+	}
 
 	@Test
 	public void testControllerFindTripsWithinDateRangeNoResults() {
@@ -520,72 +522,72 @@ class Mini2ApplicationTests {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 
-	// @Test
-	// public void testControllerAddRating() {
-	// 	Rating newRating = new Rating(1L, "customer", 5, "Excellent service!", LocalDateTime.now());
-	// 	HttpHeaders headers = new HttpHeaders();
-	// 	headers.setContentType(MediaType.APPLICATION_JSON);
-	// 	HttpEntity<Rating> request = new HttpEntity<>(newRating, headers);
+	@Test
+	public void testControllerAddRating() {
+		Rating newRating = new Rating(1L, "customer", 5, "Excellent service!", LocalDateTime.now());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<Rating> request = new HttpEntity<>(newRating, headers);
 
-	// 	ResponseEntity<Rating> response = restTemplate.postForEntity(BASE_URL_RATING + "/addRating", request, Rating.class);
-	// 	assertEquals(HttpStatus.OK, response.getStatusCode());
-	// 	assertNotNull(response.getBody());
-	// 	assertEquals(newRating.getScore(), response.getBody().getScore());
-	// }
+		ResponseEntity<Rating> response = restTemplate.postForEntity(BASE_URL_RATING + "/addRating", request, Rating.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals(newRating.getScore(), response.getBody().getScore());
+	}
 
-	// @Test
-	// public void testControllerUpdateRating() throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-	// 	Rating rating = new Rating(2L, "customer", 4, "Good service.", LocalDateTime.now());
-	// 	ratingService.addRating(rating);
+	@Test
+	public void testControllerUpdateRating() throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+		Rating rating = new Rating(2L, "customer", 4, "Good service.", LocalDateTime.now());
+		ratingService.addRating(rating);
 
-	// 	rating.setComment("Updated service.");
-	// 	rating.setScore(5);
-	// 	HttpHeaders headers = new HttpHeaders();
-	// 	headers.setContentType(MediaType.APPLICATION_JSON);
-	// 	HttpEntity<Rating> request = new HttpEntity<>(rating, headers);
+		rating.setComment("Updated service.");
+		rating.setScore(5);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<Rating> request = new HttpEntity<>(rating, headers);
 
-	// 	ResponseEntity<Rating> response = restTemplate.exchange(
-	// 			BASE_URL_RATING + "/update/" + (getID(RatingPath).get(rating)),
-	// 			HttpMethod.PUT,
-	// 			request,
-	// 			Rating.class
-	// 	);
+		ResponseEntity<Rating> response = restTemplate.exchange(
+				BASE_URL_RATING + "/update/" + (getID(RatingPath).get(rating)),
+				HttpMethod.PUT,
+				request,
+				Rating.class
+		);
 
-	// 	assertEquals(HttpStatus.OK, response.getStatusCode());
-	// 	assertNotNull(response.getBody());
-	// 	assertEquals(5, response.getBody().getScore());
-	// }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals(5, response.getBody().getScore());
+	}
 
-	// @Test
-	// public void testControllerDeleteRating() throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-	// 	Rating rating = new Rating(3L, "captain", 3, "Average captain.", LocalDateTime.now());
-	// 	ratingService.addRating(rating);
+	@Test
+	public void testControllerDeleteRating() throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
+		Rating rating = new Rating(3L, "captain", 3, "Average captain.", LocalDateTime.now());
+		ratingService.addRating(rating);
 
-	// 	ResponseEntity<String> response = restTemplate.exchange(
-	// 			BASE_URL_RATING + "/delete/" + getID(RatingPath).get(rating),
-	// 			HttpMethod.DELETE,
-	// 			null,
-	// 			String.class
-	// 	);
+		ResponseEntity<String> response = restTemplate.exchange(
+				BASE_URL_RATING + "/delete/" + getID(RatingPath).get(rating),
+				HttpMethod.DELETE,
+				null,
+				String.class
+		);
 
-	// 	assertEquals(HttpStatus.OK, response.getStatusCode());
-	// }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
 
-	// @Test
-	// public void testControllerFindRatingsByEntity() {
-	// 	Rating rating1 = new Rating(4L, "trip", 5, "Excellent trip!", LocalDateTime.now());
-	// 	Rating rating2 = new Rating(4L, "trip", 4, "Good trip!", LocalDateTime.now());
-	// 	ratingService.addRating(rating1);
-	// 	ratingService.addRating(rating2);
+	@Test
+	public void testControllerFindRatingsByEntity() {
+		Rating rating1 = new Rating(4L, "trip", 5, "Excellent trip!", LocalDateTime.now());
+		Rating rating2 = new Rating(4L, "trip", 4, "Good trip!", LocalDateTime.now());
+		ratingService.addRating(rating1);
+		ratingService.addRating(rating2);
 
-	// 	ResponseEntity<List> response = restTemplate.getForEntity(
-	// 			BASE_URL_RATING + "/findByEntity?entityId=4&entityType=trip",
-	// 			List.class
-	// 	);
+		ResponseEntity<List> response = restTemplate.getForEntity(
+				BASE_URL_RATING + "/findByEntity?entityId=4&entityType=trip",
+				List.class
+		);
 
-	// 	assertEquals(HttpStatus.OK, response.getStatusCode());
-	// 	assertNotNull(response.getBody());
-	// }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+	}
 
 	@Test
 	public void testControllerFindRatingsByNonExistingEntity() {
@@ -597,21 +599,21 @@ class Mini2ApplicationTests {
 		assertEquals(response.getBody().size(),0);
 	}
 
-	// @Test
-	// public void testControllerFindRatingsAboveScore() {
-	// 	Rating rating1 = new Rating(5L, "customer", 3, "Okay service.", LocalDateTime.now());
-	// 	Rating rating2 = new Rating(6L, "customer", 5, "Awesome service.", LocalDateTime.now());
-	// 	ratingService.addRating(rating1);
-	// 	ratingService.addRating(rating2);
+	@Test
+	public void testControllerFindRatingsAboveScore() {
+		Rating rating1 = new Rating(5L, "customer", 3, "Okay service.", LocalDateTime.now());
+		Rating rating2 = new Rating(6L, "customer", 5, "Awesome service.", LocalDateTime.now());
+		ratingService.addRating(rating1);
+		ratingService.addRating(rating2);
 
-	// 	ResponseEntity<List> response = restTemplate.getForEntity(
-	// 			BASE_URL_RATING + "/findAboveScore?minScore=4",
-	// 			List.class
-	// 	);
+		ResponseEntity<List> response = restTemplate.getForEntity(
+				BASE_URL_RATING + "/findAboveScore?minScore=4",
+				List.class
+		);
 
-	// 	assertEquals(HttpStatus.OK, response.getStatusCode());
-	// 	assertNotNull(response.getBody());
-	// }
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+	}
 
 	@Test
 	public void testControllerGetCaptainsByRatingNoResults() {

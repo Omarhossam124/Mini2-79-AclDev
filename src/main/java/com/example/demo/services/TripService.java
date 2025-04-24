@@ -4,8 +4,12 @@ package com.example.demo.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.models.Captain;
 import com.example.demo.models.Trip;
+import com.example.demo.repositories.CaptainRepository;
 import com.example.demo.repositories.TripRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,10 +18,11 @@ import java.util.List;
 public class TripService {
 
     private final TripRepository tripRepository;
-
+    private final CaptainRepository captainRepository;
     @Autowired
-    public TripService(TripRepository tripRepository) {
+    public TripService(TripRepository tripRepository,CaptainRepository captainRepository) {
         this.tripRepository = tripRepository;
+        this.captainRepository = captainRepository;
     }
 
     // Add a new trip
@@ -48,6 +53,7 @@ public class TripService {
     public void deleteTrip(Long id) {
         tripRepository.deleteById(id);
     }
+    
 
     // Find trips within date range
     public List<Trip> findTripsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
@@ -58,4 +64,5 @@ public class TripService {
     public List<Trip> findTripsByCaptainId(Long captainId) {
         return tripRepository.findByCaptainId(captainId);
     }
+
 }
